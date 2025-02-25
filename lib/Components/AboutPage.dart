@@ -11,7 +11,7 @@ class _AboutState extends State<About> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
-        double screenWidth = MediaQuery.of(context).size.width;
+    double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: AppBar(
@@ -29,8 +29,47 @@ class _AboutState extends State<About> {
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
       ),
-      body: Center(
-        child: Text("About Page"),
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(height: 5,),
+            Container(
+              width: double.infinity,
+              height: 400,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.red,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Center(
+                    child: Text(
+                      "About Us",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    "We are dedicated to creating impactful, innovative digital solutions that empower businesses to succeed. Based in Mohali, India, our team of experienced developers, designers, and strategists is passionate about turning ideas into dynamic, high-performance websites and applications.",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 10),
+            Text("We Provide Web Design, Development, and Digital Marketing Solutions", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),)
+          ],
+        ),
       ),
     );
   }
