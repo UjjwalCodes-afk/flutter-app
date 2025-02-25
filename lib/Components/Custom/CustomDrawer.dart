@@ -1,4 +1,5 @@
 
+import 'package:baseline/Components/AboutPage.dart';
 import 'package:baseline/Components/Blogs.dart';
 import 'package:baseline/Components/Careers.dart';
 import 'package:baseline/Components/Contact.dart';
@@ -59,6 +60,11 @@ Drawer customDrawer(BuildContext context) {
           _drawerItem(Icons.co_present_outlined, "Blogs", (){
             Navigator.pop(context);
             Navigator.push(context, MaterialPageRoute(builder: (context) => MyBlog()));
+          }),
+            SizedBox(height: 5,),
+          _drawerItem(Icons.flip_to_back_rounded, "About", (){
+            Navigator.pop(context);
+            Navigator.push(context, MaterialPageRoute(builder: (context) => About()));
           })
 
         ],

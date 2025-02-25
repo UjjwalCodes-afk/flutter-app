@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'dart:async';
 
 
 class ContactUsPage extends StatefulWidget {
@@ -20,36 +22,38 @@ class _ContactUsPageState extends State<ContactUsPage> {
   final TextEditingController messageController = TextEditingController();
 
   Future<void> _sendMessage() async {
-    if (!_formKey.currentState!.validate() || !isVerified || isSubmitting) return;
+  if (!_formKey.currentState!.validate() || !isVerified || isSubmitting) return;
 
-    setState(() => isSubmitting = true);
+  setState(() => isSubmitting = true);
 
-    final url = "https://nodemailer-api-7jb1.onrender.com/user/contact";
-    final requestData = {
-      "name": nameController.text.trim(),
-      "email": emailController.text.trim(),
-      "message": messageController.text.trim(),
-    };
+  final url = "https://nodemailer-api-7jb1.onrender.com/user/contact";
+  final requestData = {
+    "name": nameController.text.trim(),
+    "email": emailController.text.trim(),
+    "message": messageController.text.trim(),
+  };
 
-    try {
-      final encodedData = jsonEncode(requestData);
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {"Content-Type": "application/json"},
-        body: encodedData,
-      );
+  try {
+    final encodedData = await compute(jsonEncode, requestData); // Offload JSON parsing
+    final response = await http
+        .post(Uri.parse(url),
+            headers: {"Content-Type": "application/json"}, body: encodedData)
+        .timeout(const Duration(seconds: 10)); // Set timeout
 
-      if (response.statusCode == 200) {
-        _showSuccessDialog();
-      } else {
-        _showErrorSnackBar("Failed to send message. Try again later.");
-      }
-    } catch (e) {
-      _showErrorSnackBar("An error occurred. Please try again.");
-    } finally {
-      setState(() => isSubmitting = false);
+    if (response.statusCode == 200) {
+      _showSuccessDialog();
+    } else {
+      _showErrorSnackBar("Failed to send message. Try again later.");
     }
+  } on TimeoutException {
+    _showErrorSnackBar("Request timed out. Please try again.");
+  } catch (e) {
+    _showErrorSnackBar("An error occurred. Please try again.");
+  } finally {
+    setState(() => isSubmitting = false);
   }
+}
+
 
   void _showSuccessDialog() {
     showDialog(
