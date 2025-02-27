@@ -7,26 +7,31 @@ class Portfolio extends StatefulWidget {
   State<Portfolio> createState() => _PortfolioState();
 }
 
-class _PortfolioState extends State<Portfolio> with SingleTickerProviderStateMixin {
+class _PortfolioState extends State<Portfolio> {
   List<String> imageNames = ["portfolio1.jpeg", "portfolio2.jpeg", "portfolio1.jpeg"];
   List<String> imageSeo = ["images/seo1.png", "images/seo2.png", "images/seo3.png", "images/seo4.png"];
-  List<bool> _isHovered = [false, false, false];
+  List<bool> _isHovered = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _isHovered = List.generate(imageNames.length, (_) => false);
+  }
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.red.withOpacity(0.8),
-        leading: IconButton(onPressed: (){
-          Navigator.pop(context);
-        }, icon: Icon(Icons.arrow_back, color: Colors.white,)),
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+        ),
         title: Padding(
           padding: EdgeInsets.only(left: screenWidth * 0.05),
-          child: Image.asset(
-            'images/baselinelogo.png',
-            width: screenWidth * 0.3,
-          ),
+          child: Image.asset('images/baselinelogo.png', width: screenWidth * 0.3),
         ),
       ),
       body: SingleChildScrollView(
@@ -36,24 +41,19 @@ class _PortfolioState extends State<Portfolio> with SingleTickerProviderStateMix
           children: [
             SizedBox(height: 15),
             _buildJobOpeningCard(),
-            SizedBox(height: 10),
+            SizedBox(height: 20),
             _buildSectionTitle("Success Stories We Have Built"),
             SizedBox(height: 20),
 
             // Portfolio Image Grid
-            LayoutBuilder(
-              builder: (context, constraints) {
-                double imageSize = constraints.maxWidth / 4; // Adjust image size dynamically
-                return Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 20,
-                  runSpacing: 20,
-                  children: List.generate(
-                    imageNames.length,
-                    (index) => _buildHoverImage(index, imageSize),
-                  ),
-                );
-              },
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 20,
+              runSpacing: 20,
+              children: List.generate(
+                imageNames.length,
+                (index) => _buildHoverImage(index, screenWidth / 4),
+              ),
             ),
 
             SizedBox(height: 20),
@@ -63,20 +63,15 @@ class _PortfolioState extends State<Portfolio> with SingleTickerProviderStateMix
             // SEO Portfolio Grid
             GridView.builder(
               shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(), // Disables internal scrolling
+              physics: NeverScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: screenWidth < 600 ? 2 : 3, // Responsive columns
+                crossAxisCount: screenWidth < 600 ? 2 : 3,
                 crossAxisSpacing: 20,
                 mainAxisSpacing: 10,
                 childAspectRatio: 1,
               ),
               itemCount: imageSeo.length,
-              itemBuilder: (context, index) {
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.asset(imageSeo[index], fit: BoxFit.cover),
-                );
-              },
+              itemBuilder: (context, index) => _buildImage(imageSeo[index]),
             ),
           ],
         ),
@@ -123,9 +118,9 @@ class _PortfolioState extends State<Portfolio> with SingleTickerProviderStateMix
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 20),
-          _buildWhiteButton(text: "Opening Jobs", onPressed: () {}),
+          _buildButton("Opening Jobs", Colors.white, Colors.red, () {}),
           SizedBox(height: 10),
-          _buildRedButton(text: "Book A Consultation", onPressed: () {}),
+          _buildButton("Book A Consultation", Colors.red.shade900, Colors.white, () {}),
         ],
       ),
     );
@@ -140,9 +135,7 @@ class _PortfolioState extends State<Portfolio> with SingleTickerProviderStateMix
         transform: _isHovered[index] ? Matrix4.translationValues(0, -10, 0) : Matrix4.identity(),
         decoration: BoxDecoration(
           boxShadow: _isHovered[index]
-              ? [
-                  BoxShadow(color: Colors.black26, offset: Offset(0, 4), blurRadius: 6),
-                ]
+              ? [BoxShadow(color: Colors.black26, offset: Offset(0, 4), blurRadius: 6)]
               : [],
         ),
         child: ClipRRect(
@@ -158,40 +151,25 @@ class _PortfolioState extends State<Portfolio> with SingleTickerProviderStateMix
     );
   }
 
-  Widget _buildWhiteButton({required String text, required VoidCallback onPressed}) {
-    return MouseRegion(
-      onEnter: (_) => setState(() {}),
-      onExit: (_) => setState(() {}),
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(color: Colors.red, fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-      ),
+  Widget _buildImage(String imagePath) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: Image.asset(imagePath, fit: BoxFit.cover),
     );
   }
 
-  Widget _buildRedButton({required String text, required VoidCallback onPressed}) {
+  Widget _buildButton(String text, Color bgColor, Color textColor, VoidCallback onPressed) {
     return MouseRegion(
       onEnter: (_) => setState(() {}),
       onExit: (_) => setState(() {}),
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red.shade900,
+          backgroundColor: bgColor,
           padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
-        child: Text(
-          text,
-          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+        child: Text(text, style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
       ),
     );
   }

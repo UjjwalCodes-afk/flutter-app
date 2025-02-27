@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'dart:async';
-
 
 class ContactUsPage extends StatefulWidget {
   const ContactUsPage({super.key});
@@ -22,38 +20,36 @@ class _ContactUsPageState extends State<ContactUsPage> {
   final TextEditingController messageController = TextEditingController();
 
   Future<void> _sendMessage() async {
-  if (!_formKey.currentState!.validate() || !isVerified || isSubmitting) return;
+    if (!_formKey.currentState!.validate() || !isVerified || isSubmitting) return;
+    setState(() => isSubmitting = true);
 
-  setState(() => isSubmitting = true);
+    final url = "https://nodemailer-api-7jb1.onrender.com/user/contact";
+    final requestData = {
+      "name": nameController.text.trim(),
+      "email": emailController.text.trim(),
+      "message": messageController.text.trim(),
+    };
 
-  final url = "https://nodemailer-api-7jb1.onrender.com/user/contact";
-  final requestData = {
-    "name": nameController.text.trim(),
-    "email": emailController.text.trim(),
-    "message": messageController.text.trim(),
-  };
+    try {
+      final response = await http
+          .post(Uri.parse(url),
+              headers: {"Content-Type": "application/json"},
+              body: jsonEncode(requestData))
+          .timeout(const Duration(seconds: 10));
 
-  try {
-    final encodedData = await compute(jsonEncode, requestData); // Offload JSON parsing
-    final response = await http
-        .post(Uri.parse(url),
-            headers: {"Content-Type": "application/json"}, body: encodedData)
-        .timeout(const Duration(seconds: 10)); // Set timeout
-
-    if (response.statusCode == 200) {
-      _showSuccessDialog();
-    } else {
-      _showErrorSnackBar("Failed to send message. Try again later.");
+      if (response.statusCode == 200) {
+        _showSuccessDialog();
+      } else {
+        _showErrorSnackBar("Failed to send message. Try again later.");
+      }
+    } on TimeoutException {
+      _showErrorSnackBar("Request timed out. Please try again.");
+    } catch (e) {
+      _showErrorSnackBar("An error occurred. Please try again.");
+    } finally {
+      setState(() => isSubmitting = false);
     }
-  } on TimeoutException {
-    _showErrorSnackBar("Request timed out. Please try again.");
-  } catch (e) {
-    _showErrorSnackBar("An error occurred. Please try again.");
-  } finally {
-    setState(() => isSubmitting = false);
   }
-}
-
 
   void _showSuccessDialog() {
     showDialog(
@@ -132,22 +128,22 @@ class _ContactUsPageState extends State<ContactUsPage> {
                         activeColor: Colors.red,
                       ),
                       const SizedBox(height: 10),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: isVerified && !isSubmitting ? _sendMessage : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isVerified ? Colors.red : Colors.grey,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                          child: isSubmitting
-                              ? const CircularProgressIndicator(color: Colors.white)
-                              : const Text(
-                                  "Get free consultation",
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 500),
+                        child: isSubmitting
+                            ? const Center(child: CircularProgressIndicator(color: Colors.red))
+                            : SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: isVerified ? _sendMessage : null,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: isVerified ? Colors.red : Colors.grey,
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  ),
+                                  child: const Text("Get free consultation", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
                                 ),
-                        ),
+                              ),
                       ),
                     ],
                   ),
@@ -160,28 +156,28 @@ class _ContactUsPageState extends State<ContactUsPage> {
     );
   }
 
-Widget _buildTextField(String label, IconData icon, TextEditingController controller,
-    {bool isEmail = false, bool isMessage = false}) {
-  return TextFormField(
-    controller: controller,
-    maxLines: isMessage ? 4 : 1,
-    keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
-    decoration: InputDecoration(
-      enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-      focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-      labelText: label,
-      prefixIcon: Icon(icon, color: Colors.red),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-    ),
-    validator: (value) {
-      if (value == null || value.trim().isEmpty) {
-        return "Please enter your $label";
-      }
-      if (isEmail && !RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").hasMatch(value)) {
-        return "Enter a valid email";
-      }
-      return null;
-    },
-  );
-}
+  Widget _buildTextField(String label, IconData icon, TextEditingController controller,
+      {bool isEmail = false, bool isMessage = false}) {
+    return TextFormField(
+      controller: controller,
+      maxLines: isMessage ? 4 : 1,
+      keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
+      decoration: InputDecoration(
+        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.black.withOpacity(0.6))),
+        focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+        labelText: label,
+        prefixIcon: Icon(icon, color: Colors.red),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return "Please enter your $label";
+        }
+        if (isEmail && !RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}").hasMatch(value)) {
+          return "Enter a valid email";
+        }
+        return null;
+      },
+    );
+  }
 }
