@@ -1,13 +1,15 @@
+import 'dart:async';
+
+import 'package:baseline/Components/Custom/ContinousSlider.dart';
 import 'package:baseline/Components/Custom/CustomDrawer.dart';
 import 'package:baseline/Components/Custom/CustomListTile.dart';
+import 'package:baseline/Components/Custom/ResponsiveRow.dart';
+import 'package:baseline/Components/Custom/TechnlogySection.dart';
 import 'package:baseline/Components/ProfilePage.dart';
 
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 
 class HomePage extends StatefulWidget {
- 
-
   const HomePage({super.key});
 
   @override
@@ -16,30 +18,47 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final List<String> textContents = [
+    "Web Development & Website Design Company Mohali, India",
+    "We provide SEO and digital marketing solutions that help businesses dominate search engine rankings and maximize online visibility.",
+    "Our data-driven strategies, including search engine optimization, pay-per-click, content marketing, and social media management, ensure higher traffic, engagement, and conversions.",
+    "Let’s grow your brand online!",
+    "Baseline IT Development is a leading web development company in India with over 17 years of experience. We offer customized website solutions for businesses. We specialize in responsive design, eCommerce platforms, and SEO-friendly websites, ensuring performance, security, and scalability. Elevate your business with India's most trusted web design company.",
+  ];
   final List<String> imagePaths = [
-    "images/baseline4.jpg",
-    "images/baseline1.png",
-    "images/baseline2.png",
-    "images/baseline3.png",
+    "images/service4.jpg",
+    "images/service5.jpg",
+    "images/service6.jpg",
+    "images/service7.jpg",
+    "images/services3.jpg",
   ];
   bool imagesPreLoaded = false;
+  int _currentIndex = 0;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
+    Timer.periodic(Duration(seconds: 3), (Timer timer) {
+      if (mounted) {
+        setState(() {
+          _currentIndex = (_currentIndex + 1) % imagePaths.length;
+        });
+      }
+    });
   }
+
   @override
   void didChangeDependencies() {
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
-    if(!imagesPreLoaded){
-    preLoadImages();
-    imagesPreLoaded = true; 
+    if (!imagesPreLoaded) {
+      preLoadImages();
+      imagesPreLoaded = true;
     }
   }
-  void preLoadImages(){
-    for(String imagePath in imagePaths){
+
+  void preLoadImages() {
+    for (String imagePath in imagePaths) {
       precacheImage(AssetImage(imagePath), context);
     }
   }
@@ -53,6 +72,7 @@ class _HomePageState extends State<HomePage> {
       key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: Colors.red.withOpacity(0.8),
+
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -66,7 +86,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            
+
             IconButton(
               icon: Icon(
                 Icons.person,
@@ -95,100 +115,233 @@ class _HomePageState extends State<HomePage> {
         child: SafeArea(
           child: Column(
             children: [
-              SizedBox(height: screenHeight * 0.02),
-
-              /// **Carousel Slider**
-              CarouselSlider(
-                options: CarouselOptions(
-                  height: screenHeight * 0.25,
-                  autoPlay: true,
-                  enlargeCenterPage: true,
-                  aspectRatio: 16 / 9,
-                  viewportFraction: 0.85,
-                ),
-                items:
-                    imagePaths.map((imagePath) {
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.asset(
-                          imagePath,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
+              SizedBox(height: 20),
+              Stack(
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      // Image Container
+                      Container(
+                        height: screenHeight * 0.35,
+                        width: screenWidth,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              blurRadius: 8,
+                              spreadRadius: 3,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
                         ),
-                      );
-                    }).toList(),
-              ),
-              SizedBox(height: screenHeight * 0.03),
-
-              /// **Website Development Process Box**
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        spreadRadius: 3,
-                        blurRadius: 8,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
+                          child: AnimatedSwitcher(
+                            duration: Duration(seconds: 1),
+                            child: Image.asset(
+                              imagePaths[_currentIndex],
+                              key: ValueKey<String>(imagePaths[_currentIndex]),
+                              fit: BoxFit.cover,
+                              width: screenWidth,
+                              height: screenHeight * 0.35,
+                            ),
+                          ),
+                        ),
                       ),
+
+                      // Space between Image and Text
+                      SizedBox(height: screenHeight * 0.02),
+
+                      // Text Container (Prevents Overflow)
+                      AnimatedContainer(
+                        duration: Duration(milliseconds: 600),
+                        curve: Curves.easeInOut,
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.05,
+                          vertical: screenHeight * 0.015,
+                        ),
+                        constraints: BoxConstraints(
+                          minHeight:
+                              screenHeight * 0.08, // Ensures minimum height
+                          maxHeight:
+                              screenHeight * 0.15, // Prevents excessive growth
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              blurRadius: 6,
+                              spreadRadius: 2,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: AnimatedSize(
+                          duration: Duration(milliseconds: 600),
+                          curve: Curves.easeInOut,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth:
+                                  screenWidth * 0.9, // Prevents text overflow
+                            ),
+                            child: AnimatedSwitcher(
+                              duration: Duration(milliseconds: 600),
+                              transitionBuilder:
+                                  (widget, animation) => FadeTransition(
+                                    opacity: animation,
+                                    child: widget,
+                                  ),
+                              child: Text(
+                                textContents[_currentIndex], // Ensure `_currentIndex` is valid
+                                key: ValueKey<String>(
+                                  textContents[_currentIndex],
+                                ),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize:
+                                      screenWidth *
+                                      0.045, // Large enough for visibility
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
+                                  height: 1.3,
+                                ),
+                                maxLines: 3, // Allow 3 lines before truncating
+                                overflow:
+                                    TextOverflow
+                                        .ellipsis, // Prevent text from breaking UI
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: screenHeight * 0.02),
+
+                      // Continuous Slider Widget
+                      ContinuousSlider(), // ✅ Ensure this widget is properly defined
                     ],
                   ),
-                  padding: EdgeInsets.symmetric(
-                    vertical: screenHeight * 0.03,
-                    horizontal: screenWidth * 0.07,
-                  ),
-                  child: Center(
-                    child: Text(
-                      "Our Website Development Process",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: screenWidth * 0.05,
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
+                ],
               ),
-              SizedBox(height: screenHeight * 0.03),
 
               /// **Services Section (Horizontal Scroll)**
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200, // Light grey background
+                ),
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.center, // Align everything in center
                   children: [
-                    buildServiceColumn(
-                      screenWidth,
-                      'images/work.png',
-                      'Design and Wireframing',
+                    // First Row: Text Items
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment:
+                            MainAxisAlignment.center, // Center align
+                        children: [
+                          buildFeatureText("15+ Years of Experience"),
+                          SizedBox(width: 24), // Space between text elements
+                          buildFeatureText("1000+ Projects Delivered"),
+                          SizedBox(width: 24),
+                          buildFeatureText("500+ Happy Clients"),
+                          SizedBox(width: 24),
+                          buildFeatureText("150+ Team Members"),
+                        ],
+                      ),
                     ),
-                    buildServiceColumn(
-                      screenWidth,
-                      'images/work1.png',
-                      'Content Creation',
-                    ),
-                    buildServiceColumn(
-                      screenWidth,
-                      'images/work2.png',
-                      'Development and Coding',
-                    ),
-                    buildServiceColumn(
-                      screenWidth,
-                      'images/work3.png',
-                      'Testing and Quality Assurance',
+                    SizedBox(height: 20), // Space between text and images
+                    // Second Row: Image Items
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment:
+                            MainAxisAlignment.center, // Center align
+                        children: [
+                          buildFeatureImage("images/flutter.png"),
+                          SizedBox(width: 24),
+                          buildFeatureImage("images/fiverr.png"),
+                          SizedBox(width: 24),
+                          buildFeatureImage("images/frelancer.png"),
+                          SizedBox(width: 24),
+                          buildFeatureImage("images/linkedln.png"),
+                          SizedBox(width: 24),
+                          buildFeatureImage("images/upwork.png"),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: screenHeight * 0.03),
 
+              SizedBox(height: screenHeight * 0.03),
+              ResponsiveRow(),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 20,
+                ), // Added padding for spacing
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Color(0xFF1C2430), // Dark blue-gray color
+                  borderRadius: BorderRadius.circular(
+                    12,
+                  ), // Smooth rounded corners
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 6,
+                      spreadRadius: 2,
+                      offset: Offset(0, 4), // Slight shadow for depth
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment:
+                      CrossAxisAlignment
+                          .center, // Ensures everything is centered
+                  children: [
+                    Text(
+                      "Your Vision, Our Innovation: Expert Software Consultants",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold, // Emphasizing the title
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    SizedBox(height: 8), // Adjusted spacing
+                    Text(
+                      "We're expert software consultants, delivering innovative solutions to power your business growth.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color:
+                            Colors
+                                .white70, // Slightly lighter text color for contrast
+                        fontSize: 18,
+                      ),
+                    ),
+                    
+                  ],
+                ),
+              ),
+              SizedBox(height: 10,),
+              TechnologySection(),
               /// **Trusted Web Design Partner Box**
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
                 child: Row(
                   children: [
+                    SizedBox(height: 10,),
                     Expanded(
                       child: Text(
                         "Your Trusted Web Design Partner in India",
@@ -351,7 +504,10 @@ class _HomePageState extends State<HomePage> {
                 ),
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  image: DecorationImage(image: AssetImage('images/background.png',), fit: BoxFit.cover),
+                  image: DecorationImage(
+                    image: AssetImage('images/background.png'),
+                    fit: BoxFit.cover,
+                  ),
                   color: Colors.purple.shade900,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
@@ -436,6 +592,54 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget buildFeatureText(String text) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            blurRadius: 5,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+        ),
+      ),
+    );
+  }
+
+  // Helper Function for Images
+  Widget buildFeatureImage(String imagePath) {
+    return Container(
+      width: 80, // Adjusted size for consistency
+      height: 80,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            blurRadius: 5,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.asset(imagePath, fit: BoxFit.contain),
       ),
     );
   }
